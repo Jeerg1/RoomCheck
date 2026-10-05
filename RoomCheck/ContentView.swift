@@ -24,6 +24,10 @@ struct ContentView: View {
                     .disabled(address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 } else {
                     Section(address.isEmpty ? "Open inspection" : address) {
+                        if session.rooms.isEmpty {
+                            Text("No rooms left")
+                                .foregroundStyle(.secondary)
+                        }
                         ForEach(session.rooms) { room in
                             Text(room.name)
                         }

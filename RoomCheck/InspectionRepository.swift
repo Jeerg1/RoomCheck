@@ -67,9 +67,7 @@ final class CoreDataInspectionRepository: InspectionRepository {
         nil
     }
 
-    func save(_ inspection: PropertyInspection) {
-        inspection.rooms.forEach(save)
-    }
+    func save(_ inspection: PropertyInspection) {}
 
     private func existing(id: UUID, in context: NSManagedObjectContext) -> CDInspectionRoom? {
         let request = NSFetchRequest<CDInspectionRoom>(entityName: "InspectionRoom")

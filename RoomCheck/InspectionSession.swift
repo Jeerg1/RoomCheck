@@ -11,20 +11,16 @@ final class InspectionSession: ObservableObject {
     @Published private(set) var rooms: [InspectionRoom] = []
     @Published var message: String?
 
-    private let repository: InspectionRepository
     private let openInspection: OpenInspection
 
     init(repository: InspectionRepository) {
-        self.repository = repository
         openInspection = OpenInspection(repository: repository)
-        rooms = repository.rooms()
     }
 
     func start(address: String) {
-        guard rooms.isEmpty else { return }
         do {
-            _ = try openInspection.call(address: address)
-            rooms = repository.rooms()
+            let inspection = try openInspection.call(address: address)
+            rooms = inspection.rooms
             message = nil
         } catch let error as InspectionJobError {
             message = error.message

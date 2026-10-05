@@ -11,11 +11,11 @@ enum InspectionModel {
     static func make() -> NSManagedObjectModel {
         let room = NSEntityDescription()
         room.name = "InspectionRoom"
-        room.managedObjectClassName = NSStringFromClass(CDInspectionRoom.self)
+        room.managedObjectClassName = "CDInspectionRoom"
 
         let defect = NSEntityDescription()
         defect.name = "DefectNote"
-        defect.managedObjectClassName = NSStringFromClass(CDDefectNote.self)
+        defect.managedObjectClassName = "CDDefectNote"
 
         let defects = NSRelationshipDescription()
         defects.name = "defects"

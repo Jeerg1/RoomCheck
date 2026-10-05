@@ -1,3 +1,10 @@
+//
+//  InspectionRepository.swift
+//  RoomCheck
+//
+//  Created by John Re on 5/10/2026.
+//
+
 import CoreData
 import Foundation
 
@@ -16,7 +23,7 @@ final class CoreDataInspectionRepository: InspectionRepository {
         container = NSPersistentContainer(name: "RoomCheck", managedObjectModel: InspectionModel.make())
         container.loadPersistentStores { _, error in
             if let error {
-                assertionFailure("Store failed: \(error)")
+                print("Store failed: \(error)")
             }
         }
     }

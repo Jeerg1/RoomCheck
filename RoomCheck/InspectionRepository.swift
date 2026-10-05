@@ -64,11 +64,20 @@ final class CoreDataInspectionRepository: InspectionRepository {
     }
 
     func openInspection(address: String) -> PropertyInspection? {
-        nil
+        let saved = rooms()
+        guard !saved.isEmpty else { return nil }
+        return PropertyInspection(
+            id: UUID(),
+            propertyAddress: address,
+            openedAt: Date(),
+            closedAt: nil,
+            rooms: saved
+        )
     }
 
-    func save(_ inspection: PropertyInspection) {}
-
+    func save(_ inspection: PropertyInspection) {
+        inspection.rooms.forEach(save)
+    }
     private func existing(id: UUID, in context: NSManagedObjectContext) -> CDInspectionRoom? {
         let request = NSFetchRequest<CDInspectionRoom>(entityName: "InspectionRoom")
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)

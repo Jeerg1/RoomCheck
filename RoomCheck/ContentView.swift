@@ -8,20 +8,33 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var session = InspectionSession(
+        repository: CoreDataInspectionRepository()
+    )
     @State private var address = ""
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Property address", text: $address)
-                Button("Open inspection") {}
-                    .disabled(address.trimmingCharacters(in: .whitespaces).isEmpty)
+                if session.rooms.isEmpty {
+                    TextField("Property address", text: $address)
+                    Button("Open inspection") {
+                        session.start(address: address)
+                    }
+                    .disabled(address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                } else {
+                    Section(address.isEmpty ? "Open inspection" : address) {
+                        ForEach(session.rooms) { room in
+                            Text(room.name)
+                        }
+                    }
+                }
+                if let message = session.message {
+                    Text(message)
+                        .foregroundStyle(.red)
+                }
             }
             .navigationTitle("Inspections")
         }
     }
-}
-
-#Preview {
-    ContentView()
 }

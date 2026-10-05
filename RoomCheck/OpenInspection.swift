@@ -35,9 +35,21 @@ struct OpenInspection {
             propertyAddress: trimmed,
             openedAt: Date(),
             closedAt: nil,
-            rooms: []
+            rooms: Self.standardRooms()
         )
         repository.save(inspection)
         return inspection
+    }
+
+    static func standardRooms() -> [InspectionRoom] {
+        ["Entry", "Kitchen", "Living", "Bedroom", "Bathroom", "Laundry"].enumerated().map { index, name in
+            InspectionRoom(
+                id: UUID(),
+                name: name,
+                sortOrder: index,
+                status: .unchecked,
+                defects: []
+            )
+        }
     }
 }

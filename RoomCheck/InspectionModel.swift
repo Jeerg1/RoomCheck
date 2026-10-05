@@ -34,21 +34,47 @@ enum InspectionModel {
         defects.inverseRelationship = roomLink
         roomLink.inverseRelationship = defects
 
-        room.properties = [defects]
-        defect.properties = [roomLink]
+        room.properties = [
+            attribute("id", .UUIDAttributeType),
+            attribute("name", .stringAttributeType),
+            attribute("sortOrder", .integer16AttributeType),
+            attribute("statusRaw", .stringAttributeType),
+            defects
+        ]
+        defect.properties = [
+            attribute("id", .UUIDAttributeType),
+            attribute("body", .stringAttributeType),
+            attribute("createdAt", .dateAttributeType),
+            roomLink
+        ]
 
         let model = NSManagedObjectModel()
         model.entities = [room, defect]
         return model
     }
+
+    private static func attribute(_ name: String, _ type: NSAttributeType) -> NSAttributeDescription {
+        let attribute = NSAttributeDescription()
+        attribute.name = name
+        attribute.attributeType = type
+        attribute.isOptional = false
+        return attribute
+    }
 }
 
 @objc(CDInspectionRoom)
 final class CDInspectionRoom: NSManagedObject {
+    @NSManaged var id: UUID?
+    @NSManaged var name: String?
+    @NSManaged var sortOrder: Int16
+    @NSManaged var statusRaw: String?
     @NSManaged var defects: NSSet?
 }
 
 @objc(CDDefectNote)
 final class CDDefectNote: NSManagedObject {
+    @NSManaged var id: UUID?
+    @NSManaged var body: String?
+    @NSManaged var createdAt: Date?
     @NSManaged var room: CDInspectionRoom?
 }

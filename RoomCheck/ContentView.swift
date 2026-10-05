@@ -23,11 +23,7 @@ struct ContentView: View {
                     }
                     .disabled(address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 } else {
-                    Section(address.isEmpty ? "Open inspection" : address) {
-                        if session.rooms.isEmpty {
-                            Text("No rooms left")
-                                .foregroundStyle(.secondary)
-                        }
+                    Section(address) {
                         ForEach(session.rooms) { room in
                             Text(room.name)
                         }
@@ -36,6 +32,9 @@ struct ContentView: View {
                 if let message = session.message {
                     Text(message)
                         .foregroundStyle(.red)
+                    Button("Clear open inspection") {
+                        session.clear()
+                    }
                 }
             }
             .navigationTitle("Inspections")

@@ -32,4 +32,9 @@ final class InspectionSession: ObservableObject {
             message = "The inspection could not be saved. Try again."
         }
     }
+
+    func clear() {
+        rooms = []
+        message = nil
+    }
 }

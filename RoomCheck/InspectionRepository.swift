@@ -76,8 +76,14 @@ final class CoreDataInspectionRepository: InspectionRepository {
     }
 
     func save(_ inspection: PropertyInspection) {
+        let context = container.viewContext
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "InspectionRoom")
+        let wipe = NSBatchDeleteRequest(fetchRequest: request)
+        _ = try? context.execute(wipe)
+        context.reset()
         inspection.rooms.forEach(save)
     }
+
     private func existing(id: UUID, in context: NSManagedObjectContext) -> CDInspectionRoom? {
         let request = NSFetchRequest<CDInspectionRoom>(entityName: "InspectionRoom")
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)

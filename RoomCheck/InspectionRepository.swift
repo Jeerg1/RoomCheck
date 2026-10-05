@@ -1,10 +1,3 @@
-//
-//  InspectionRepository.swift
-//  RoomCheck
-//
-//  Created by John Re on 5/10/2026.
-//
-
 import CoreData
 import Foundation
 
@@ -12,6 +5,8 @@ protocol InspectionRepository {
     func save(_ room: InspectionRoom)
     func rooms() -> [InspectionRoom]
     func uncheckedRooms() -> [InspectionRoom]
+    func openInspection(address: String) -> PropertyInspection?
+    func save(_ inspection: PropertyInspection)
 }
 
 final class CoreDataInspectionRepository: InspectionRepository {
@@ -59,6 +54,14 @@ final class CoreDataInspectionRepository: InspectionRepository {
         request.predicate = NSPredicate(format: "statusRaw == %@", RoomStatus.unchecked.rawValue)
         request.sortDescriptors = [NSSortDescriptor(key: "sortOrder", ascending: true)]
         return (try? container.viewContext.fetch(request))?.map(map) ?? []
+    }
+
+    func openInspection(address: String) -> PropertyInspection? {
+        nil
+    }
+
+    func save(_ inspection: PropertyInspection) {
+        inspection.rooms.forEach(save)
     }
 
     private func existing(id: UUID, in context: NSManagedObjectContext) -> CDInspectionRoom? {

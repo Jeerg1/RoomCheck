@@ -8,14 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var address = ""
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            Form {
+                TextField("Property address", text: $address)
+                Button("Open inspection") {}
+                    .disabled(address.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            .navigationTitle("Inspections")
         }
-        .padding()
     }
 }
 

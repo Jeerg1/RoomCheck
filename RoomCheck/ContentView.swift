@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var session = InspectionSession(
-        repository: CoreDataInspectionRepository()
-    )
+    @EnvironmentObject private var session: InspectionSession
     @State private var address = ""
 
     var body: some View {

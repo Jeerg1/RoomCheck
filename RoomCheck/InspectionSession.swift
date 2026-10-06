@@ -22,6 +22,21 @@ final class InspectionSession: ObservableObject {
         rooms = repository.rooms()
         publishWidget()
     }
+    
+    func attachSharedPhoto() {
+        let store = UserDefaults(suiteName: "group.JohnReUTS.RoomCheck")
+        guard let path = store?.string(forKey: "sharedPhotoPath"),
+              let index = rooms.firstIndex(where: { $0.status != .clear }) else { return }
+        store?.removeObject(forKey: "sharedPhotoPath")
+        do {
+            let updated = try recordDefect.call(room: rooms[index], note: "Shared photo", photoPath: path)
+            repository.save(updated)
+            rooms[index] = updated
+            publishWidget()
+        } catch {
+            message = "The shared photo could not be saved."
+        }
+    }
 
     func start(address: String) {
         guard rooms.isEmpty else { return }

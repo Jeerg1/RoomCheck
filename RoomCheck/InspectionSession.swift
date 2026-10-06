@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import WidgetKit
 
 final class InspectionSession: ObservableObject {
     @Published private(set) var rooms: [InspectionRoom] = []
@@ -59,5 +60,6 @@ final class InspectionSession: ObservableObject {
     private func publishWidget() {
         let summary = rooms.isEmpty ? "No rooms" : "\(rooms.filter { $0.status == .unchecked }.count) unchecked"
         UserDefaults(suiteName: "group.JohnReUTS.RoomCheck")?.set(summary, forKey: "widgetSummary")
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

@@ -19,6 +19,7 @@ final class InspectionSession: ObservableObject {
         self.repository = repository
         openInspection = OpenInspection(repository: repository)
         rooms = repository.rooms()
+        publishWidget()
     }
 
     func start(address: String) {
@@ -27,6 +28,7 @@ final class InspectionSession: ObservableObject {
             _ = try openInspection.call(address: address)
             rooms = repository.rooms()
             message = nil
+            publishWidget()
         } catch let error as InspectionJobError {
             message = error.message
         } catch {
@@ -41,6 +43,7 @@ final class InspectionSession: ObservableObject {
             repository.save(updated)
             rooms[index] = updated
             message = nil
+            publishWidget()
         } catch let error as InspectionJobError {
             message = error.message
         } catch {
@@ -51,5 +54,10 @@ final class InspectionSession: ObservableObject {
     func clear() {
         rooms = []
         message = nil
+    }
+
+    private func publishWidget() {
+        let summary = rooms.isEmpty ? "No rooms" : "\(rooms.filter { $0.status == .unchecked }.count) unchecked"
+        UserDefaults(suiteName: "group.JohnReUTS.RoomCheck")?.set(summary, forKey: "widgetSummary")
     }
 }

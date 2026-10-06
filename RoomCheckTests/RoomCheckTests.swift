@@ -60,3 +60,16 @@ struct RecordDefectTests {
         }
     }
 }
+
+struct CloseInspectionTests {
+    @Test func rejectsCloseWhileARoomIsUnchecked() {
+        let rooms = [
+            InspectionRoom(id: UUID(), name: "Kitchen", sortOrder: 1, status: .clear, defects: []),
+            InspectionRoom(id: UUID(), name: "Laundry", sortOrder: 5, status: .unchecked, defects: [])
+        ]
+
+        #expect(throws: CloseInspectionError.roomUnchecked(name: "Laundry")) {
+            try CloseInspection().call(rooms: rooms)
+        }
+    }
+}

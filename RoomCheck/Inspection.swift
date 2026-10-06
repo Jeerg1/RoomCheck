@@ -34,5 +34,6 @@ enum RoomStatus: String, Equatable {
 struct DefectNote: Identifiable, Equatable {
     let id: UUID
     var body: String
+    var photoPath: String?
     var createdAt: Date
 }

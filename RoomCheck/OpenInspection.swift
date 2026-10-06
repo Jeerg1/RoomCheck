@@ -10,6 +10,7 @@ import Foundation
 enum InspectionJobError: Error, Equatable {
     case emptyAddress
     case inspectionAlreadyOpen(address: String)
+    case emptyDefectNote
 
     var message: String {
         switch self {
@@ -17,6 +18,8 @@ enum InspectionJobError: Error, Equatable {
             return "Enter the property address before you start the walk-through."
         case .inspectionAlreadyOpen(let address):
             return "Close the open inspection at \(address) before you start another."
+        case .emptyDefectNote:
+            return "Write what is wrong in this room. A photo alone is not a condition note."
         }
     }
 }

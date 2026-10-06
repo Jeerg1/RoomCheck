@@ -13,6 +13,7 @@ final class InspectionSession: ObservableObject {
 
     private let repository: InspectionRepository
     private let openInspection: OpenInspection
+    private let recordDefect = RecordDefect()
 
     init(repository: InspectionRepository) {
         self.repository = repository
@@ -30,6 +31,20 @@ final class InspectionSession: ObservableObject {
             message = error.message
         } catch {
             message = "The inspection could not be saved. Try again."
+        }
+    }
+
+    func addDefect(roomId: UUID, note: String, photoPath: String?) {
+        guard let index = rooms.firstIndex(where: { $0.id == roomId }) else { return }
+        do {
+            let updated = try recordDefect.call(room: rooms[index], note: note, photoPath: photoPath)
+            repository.save(updated)
+            rooms[index] = updated
+            message = nil
+        } catch let error as InspectionJobError {
+            message = error.message
+        } catch {
+            message = "The defect could not be saved. Try again."
         }
     }
 

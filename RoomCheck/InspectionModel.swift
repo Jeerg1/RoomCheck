@@ -44,6 +44,7 @@ enum InspectionModel {
         defect.properties = [
             attribute("id", .UUIDAttributeType),
             attribute("body", .stringAttributeType),
+            attribute("photoPath", .stringAttributeType, optional: true),
             attribute("createdAt", .dateAttributeType),
             roomLink
         ]
@@ -53,11 +54,15 @@ enum InspectionModel {
         return model
     }
 
-    private static func attribute(_ name: String, _ type: NSAttributeType) -> NSAttributeDescription {
+    private static func attribute(
+        _ name: String,
+        _ type: NSAttributeType,
+        optional: Bool = false
+    ) -> NSAttributeDescription {
         let attribute = NSAttributeDescription()
         attribute.name = name
         attribute.attributeType = type
-        attribute.isOptional = false
+        attribute.isOptional = optional
         return attribute
     }
 }
@@ -75,6 +80,7 @@ final class CDInspectionRoom: NSManagedObject {
 final class CDDefectNote: NSManagedObject {
     @NSManaged var id: UUID?
     @NSManaged var body: String?
+    @NSManaged var photoPath: String?
     @NSManaged var createdAt: Date?
     @NSManaged var room: CDInspectionRoom?
 }

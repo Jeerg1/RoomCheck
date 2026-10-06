@@ -23,9 +23,11 @@ struct ContentView: View {
                     }
                     .disabled(address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 } else {
-                    Section(address) {
+                    Section(address.isEmpty ? "Open inspection" : address) {
                         ForEach(session.rooms) { room in
-                            Text(room.name)
+                            NavigationLink(room.name) {
+                                RoomDetailView(room: room)
+                            }
                         }
                     }
                 }
@@ -38,6 +40,49 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Inspections")
+            .environmentObject(session)
         }
+    }
+}
+
+struct RoomDetailView: View {
+    @EnvironmentObject private var session: InspectionSession
+    let room: InspectionRoom
+    @State private var note = ""
+    @State private var photoPath = ""
+
+    private var live: InspectionRoom {
+        session.rooms.first { $0.id == room.id } ?? room
+    }
+
+    var body: some View {
+        Form {
+            if live.defects.isEmpty {
+                Text("No defects in this room")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(live.defects) { defect in
+                VStack(alignment: .leading) {
+                    Text(defect.body)
+                    if let photoPath = defect.photoPath {
+                        Text(photoPath)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            TextField("What is wrong in this room?", text: $note)
+            TextField("Photo path", text: $photoPath)
+            Button("Record defect") {
+                session.addDefect(roomId: live.id, note: note, photoPath: photoPath)
+                note = ""
+                photoPath = ""
+            }
+            if let message = session.message {
+                Text(message)
+                    .foregroundStyle(.red)
+            }
+        }
+        .navigationTitle(live.name)
     }
 }

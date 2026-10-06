@@ -14,11 +14,22 @@ class ShareViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         guard let item = extensionContext?.inputItems.first as? NSExtensionItem,
-              let provider = item.attachments?.first else { return }
+              let provider = item.attachments?.first else {
+            extensionContext?.cancelRequest(withError: CocoaError(.fileNoSuchFile))
+            return
+        }
         let type = UTType.image.identifier
-        guard provider.hasItemConformingToTypeIdentifier(type) else { return }
+        guard provider.hasItemConformingToTypeIdentifier(type) else {
+            extensionContext?.cancelRequest(withError: CocoaError(.fileReadUnsupportedScheme))
+            return
+        }
         provider.loadFileRepresentation(forTypeIdentifier: type) { url, _ in
-            guard let url else { return }
+            guard let url else {
+                DispatchQueue.main.async {
+                    self.extensionContext?.cancelRequest(withError: CocoaError(.fileReadUnknown))
+                }
+                return
+            }
             self.store(url)
         }
     }
@@ -32,6 +43,9 @@ class ShareViewController: UIViewController {
             try? FileManager.default.removeItem(at: destination)
             try? FileManager.default.copyItem(at: url, to: destination)
             UserDefaults(suiteName: suite)?.set(destination.path, forKey: "sharedPhotoPath")
+        }
+        DispatchQueue.main.async {
+            self.extensionContext?.completeRequest(returningItems: nil)
         }
     }
 }

@@ -5,6 +5,7 @@
 //  Created by John Re on 5/10/2026.
 //
 
+import Foundation
 import Testing
 @testable import RoomCheck
 
@@ -40,6 +41,22 @@ struct OpenInspectionTests {
 
         #expect(throws: InspectionJobError.inspectionAlreadyOpen(address: "12 Darling Street")) {
             try useCase.call(address: "12 darling street")
+        }
+    }
+}
+
+struct RecordDefectTests {
+    @Test func rejectsDefectWithEmptyNote() {
+        let room = InspectionRoom(
+            id: UUID(),
+            name: "Kitchen",
+            sortOrder: 1,
+            status: .unchecked,
+            defects: []
+        )
+
+        #expect(throws: InspectionJobError.emptyDefectNote) {
+            try RecordDefect().call(room: room, note: "   ", photoPath: "kitchen.jpg")
         }
     }
 }

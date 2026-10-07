@@ -9,6 +9,10 @@ import CoreData
 
 enum InspectionModel {
     static func make() -> NSManagedObjectModel {
+        let inspection = NSEntityDescription()
+        inspection.name = "PropertyInspection"
+        inspection.managedObjectClassName = "CDPropertyInspection"
+
         let room = NSEntityDescription()
         room.name = "InspectionRoom"
         room.managedObjectClassName = "CDInspectionRoom"
@@ -16,6 +20,23 @@ enum InspectionModel {
         let defect = NSEntityDescription()
         defect.name = "DefectNote"
         defect.managedObjectClassName = "CDDefectNote"
+
+        let rooms = NSRelationshipDescription()
+        rooms.name = "rooms"
+        rooms.destinationEntity = room
+        rooms.deleteRule = .cascadeDeleteRule
+        rooms.minCount = 0
+        rooms.maxCount = 0
+
+        let inspectionLink = NSRelationshipDescription()
+        inspectionLink.name = "inspection"
+        inspectionLink.destinationEntity = inspection
+        inspectionLink.deleteRule = .nullifyDeleteRule
+        inspectionLink.minCount = 1
+        inspectionLink.maxCount = 1
+
+        rooms.inverseRelationship = inspectionLink
+        inspectionLink.inverseRelationship = rooms
 
         let defects = NSRelationshipDescription()
         defects.name = "defects"
@@ -34,13 +55,23 @@ enum InspectionModel {
         defects.inverseRelationship = roomLink
         roomLink.inverseRelationship = defects
 
+        inspection.properties = [
+            attribute("id", .UUIDAttributeType),
+            attribute("propertyAddress", .stringAttributeType),
+            attribute("openedAt", .dateAttributeType),
+            attribute("closedAt", .dateAttributeType, optional: true),
+            rooms
+        ]
+
         room.properties = [
             attribute("id", .UUIDAttributeType),
             attribute("name", .stringAttributeType),
             attribute("sortOrder", .integer16AttributeType),
             attribute("statusRaw", .stringAttributeType),
+            inspectionLink,
             defects
         ]
+
         defect.properties = [
             attribute("id", .UUIDAttributeType),
             attribute("body", .stringAttributeType),
@@ -50,7 +81,7 @@ enum InspectionModel {
         ]
 
         let model = NSManagedObjectModel()
-        model.entities = [room, defect]
+        model.entities = [inspection, room, defect]
         return model
     }
 
@@ -67,12 +98,22 @@ enum InspectionModel {
     }
 }
 
+@objc(CDPropertyInspection)
+final class CDPropertyInspection: NSManagedObject {
+    @NSManaged var id: UUID?
+    @NSManaged var propertyAddress: String?
+    @NSManaged var openedAt: Date?
+    @NSManaged var closedAt: Date?
+    @NSManaged var rooms: NSSet?
+}
+
 @objc(CDInspectionRoom)
 final class CDInspectionRoom: NSManagedObject {
     @NSManaged var id: UUID?
     @NSManaged var name: String?
     @NSManaged var sortOrder: Int16
     @NSManaged var statusRaw: String?
+    @NSManaged var inspection: CDPropertyInspection?
     @NSManaged var defects: NSSet?
 }
 

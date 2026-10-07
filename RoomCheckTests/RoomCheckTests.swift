@@ -82,4 +82,25 @@ struct CloseInspectionTests {
             try CloseInspection().call(rooms: rooms)
         }
     }
+    
+    @Test func allowsCloseWhenAllRoomsAreChecked() throws {
+        let rooms = [
+            InspectionRoom(
+                id: UUID(),
+                name: "Kitchen",
+                sortOrder: 1,
+                status: .clear,
+                defects: []
+            ),
+            InspectionRoom(
+                id: UUID(),
+                name: "Laundry",
+                sortOrder: 5,
+                status: .hasDefect,
+                defects: []
+            )
+        ]
+
+        try CloseInspection().call(rooms: rooms)
+    }
 }

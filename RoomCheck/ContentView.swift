@@ -24,18 +24,9 @@ struct ContentView: View {
                         address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     )
                 } else {
-                    Section(address.isEmpty ? "Open inspection" : address) {
-                        ForEach(session.rooms) { room in
-                            NavigationLink(room.name) {
-                                RoomDetailView(room: room)
-                            }
-                        }
+                    NavigationLink("Continue Open Inspection") {
+                        ActiveInspectionView()
                     }
-
-                    Button("Close Inspection") {
-                        session.close()
-                    }
-                    .buttonStyle(.borderedProminent)
                 }
 
                 NavigationLink("Inspection History") {
@@ -53,6 +44,56 @@ struct ContentView: View {
             }
             .navigationTitle("Inspections")
             .environmentObject(session)
+        }
+    }
+}
+
+struct ActiveInspectionView: View {
+    @EnvironmentObject private var session: InspectionSession
+
+    var body: some View {
+        Form {
+            Section(
+                session.inspection?.propertyAddress ?? "Open Inspection"
+            ) {
+                ForEach(session.rooms) { room in
+                    NavigationLink {
+                        RoomDetailView(room: room)
+                    } label: {
+                        HStack {
+                            Text(room.name)
+
+                            Spacer()
+
+                            Text(statusText(for: room))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
+            Button("Close Inspection") {
+                session.close()
+            }
+            .buttonStyle(.borderedProminent)
+
+            if let message = session.message {
+                Text(message)
+                    .foregroundStyle(.red)
+            }
+        }
+        .navigationTitle("Open Inspection")
+        .navigationBarBackButtonHidden(false)
+    }
+
+    private func statusText(for room: InspectionRoom) -> String {
+        switch room.status {
+        case .unchecked:
+            return "Unchecked"
+        case .clear:
+            return "Clear"
+        case .hasDefect:
+            return "Defect"
         }
     }
 }

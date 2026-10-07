@@ -11,6 +11,7 @@ import WidgetKit
 final class InspectionSession: ObservableObject {
     @Published private(set) var rooms: [InspectionRoom] = []
     @Published private(set) var inspection: PropertyInspection?
+    @Published private(set) var closedInspections: [PropertyInspection] = []
     @Published var message: String?
 
     private let repository: InspectionRepository
@@ -22,6 +23,7 @@ final class InspectionSession: ObservableObject {
         self.repository = repository
         openInspection = OpenInspection(repository: repository)
         rooms = repository.rooms()
+        closedInspections = repository.closedInspections()
         publishWidget()
     }
     
@@ -81,6 +83,7 @@ final class InspectionSession: ObservableObject {
             inspection.closedAt = Date()
 
             repository.save(inspection)
+            closedInspections = repository.closedInspections()
 
             self.inspection = nil
             rooms = []

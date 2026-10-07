@@ -16,10 +16,13 @@ struct ContentView: View {
             Form {
                 if session.rooms.isEmpty {
                     TextField("Property address", text: $address)
+
                     Button("Open inspection") {
                         session.start(address: address)
                     }
-                    .disabled(address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(
+                        address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
                 } else {
                     Section(address.isEmpty ? "Open inspection" : address) {
                         ForEach(session.rooms) { room in
@@ -34,9 +37,15 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
                 }
+
+                NavigationLink("Inspection History") {
+                    InspectionHistoryView()
+                }
+
                 if let message = session.message {
                     Text(message)
                         .foregroundStyle(.red)
+
                     Button("Clear open inspection") {
                         session.clear()
                     }
@@ -45,6 +54,33 @@ struct ContentView: View {
             .navigationTitle("Inspections")
             .environmentObject(session)
         }
+    }
+}
+
+struct InspectionHistoryView: View {
+    @EnvironmentObject private var session: InspectionSession
+
+    var body: some View {
+        List {
+            if session.closedInspections.isEmpty {
+                Text("No closed inspections yet")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(session.closedInspections) { inspection in
+                    VStack(alignment: .leading) {
+                        Text(inspection.propertyAddress)
+                            .font(.headline)
+
+                        if let closedAt = inspection.closedAt {
+                            Text(closedAt.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Inspection History")
     }
 }
 

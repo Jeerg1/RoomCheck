@@ -20,7 +20,11 @@ final class CoreDataInspectionRepository: InspectionRepository {
     private let container: NSPersistentContainer
 
     init() {
-        container = NSPersistentContainer(name: "RoomCheck", managedObjectModel: InspectionModel.make())
+        container = NSPersistentContainer(
+            name: "RoomCheck",
+            managedObjectModel: InspectionModel.make()
+        )
+
         container.loadPersistentStores { _, error in
             if let error {
                 print("Store failed: \(error)")
@@ -28,73 +32,194 @@ final class CoreDataInspectionRepository: InspectionRepository {
         }
     }
 
+    func save(_ inspection: PropertyInspection) {
+        let context = container.viewContext
+
+        let storedInspection =
+            existingInspection(id: inspection.id, in: context)
+            ?? CDPropertyInspection(context: context)
+
+        storedInspection.id = inspection.id
+        storedInspection.propertyAddress = inspection.propertyAddress
+        storedInspection.openedAt = inspection.openedAt
+        storedInspection.closedAt = inspection.closedAt
+
+        for room in inspection.rooms {
+            let storedRoom =
+                existingRoom(id: room.id, in: context)
+                ?? CDInspectionRoom(context: context)
+
+            storedRoom.id = room.id
+            storedRoom.name = room.name
+            storedRoom.sortOrder = Int16(room.sortOrder)
+            storedRoom.statusRaw = room.status.rawValue
+            storedRoom.inspection = storedInspection
+
+            saveDefects(room.defects, for: storedRoom, in: context)
+        }
+
+        try? context.save()
+    }
+
     func save(_ room: InspectionRoom) {
         let context = container.viewContext
-        let object = existing(id: room.id, in: context) ?? CDInspectionRoom(context: context)
-        object.id = room.id
-        object.name = room.name
-        object.sortOrder = Int16(room.sortOrder)
-        object.statusRaw = room.status.rawValue
 
-        let existingNotes = (object.defects as? Set<CDDefectNote>) ?? []
-        for note in existingNotes where !room.defects.contains(where: { $0.id == note.id }) {
-            context.delete(note)
+        guard let storedRoom = existingRoom(id: room.id, in: context) else {
+            return
         }
-        for note in room.defects {
-            let stored = existingNotes.first { $0.id == note.id } ?? CDDefectNote(context: context)
-            stored.id = note.id
-            stored.body = note.body
-            stored.createdAt = note.createdAt
-            stored.room = object
-        }
+
+        storedRoom.name = room.name
+        storedRoom.sortOrder = Int16(room.sortOrder)
+        storedRoom.statusRaw = room.status.rawValue
+
+        saveDefects(room.defects, for: storedRoom, in: context)
+
         try? context.save()
     }
 
     func rooms() -> [InspectionRoom] {
-        let request = NSFetchRequest<CDInspectionRoom>(entityName: "InspectionRoom")
-        request.sortDescriptors = [NSSortDescriptor(key: "sortOrder", ascending: true)]
-        return (try? container.viewContext.fetch(request))?.map(map) ?? []
+        let request = NSFetchRequest<CDInspectionRoom>(
+            entityName: "InspectionRoom"
+        )
+
+        request.predicate = NSPredicate(
+            format: "inspection.closedAt == nil"
+        )
+
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "sortOrder", ascending: true)
+        ]
+
+        return (try? container.viewContext.fetch(request))?.map(mapRoom) ?? []
     }
 
     func uncheckedRooms() -> [InspectionRoom] {
-        let request = NSFetchRequest<CDInspectionRoom>(entityName: "InspectionRoom")
-        request.predicate = NSPredicate(format: "statusRaw == %@", RoomStatus.unchecked.rawValue)
-        request.sortDescriptors = [NSSortDescriptor(key: "sortOrder", ascending: true)]
-        return (try? container.viewContext.fetch(request))?.map(map) ?? []
+        let request = NSFetchRequest<CDInspectionRoom>(
+            entityName: "InspectionRoom"
+        )
+
+        request.predicate = NSPredicate(
+            format: "inspection.closedAt == nil AND statusRaw == %@",
+            RoomStatus.unchecked.rawValue
+        )
+
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "sortOrder", ascending: true)
+        ]
+
+        return (try? container.viewContext.fetch(request))?.map(mapRoom) ?? []
     }
 
     func openInspection(address: String) -> PropertyInspection? {
-        let saved = rooms()
-        guard !saved.isEmpty else { return nil }
-        return PropertyInspection(
-            id: UUID(),
-            propertyAddress: address,
-            openedAt: Date(),
-            closedAt: nil,
-            rooms: saved
+        let request = NSFetchRequest<CDPropertyInspection>(
+            entityName: "PropertyInspection"
         )
-    }
 
-    func save(_ inspection: PropertyInspection) {
-        let context = container.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "InspectionRoom")
-        let wipe = NSBatchDeleteRequest(fetchRequest: request)
-        _ = try? context.execute(wipe)
-        context.reset()
-        inspection.rooms.forEach(save)
-    }
+        request.predicate = NSPredicate(
+            format: "closedAt == nil AND propertyAddress =[c] %@",
+            address
+        )
 
-    private func existing(id: UUID, in context: NSManagedObjectContext) -> CDInspectionRoom? {
-        let request = NSFetchRequest<CDInspectionRoom>(entityName: "InspectionRoom")
-        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
+
+        guard let stored = (try? container.viewContext.fetch(request))?.first else {
+            return nil
+        }
+
+        return mapInspection(stored)
+    }
+
+    private func saveDefects(
+        _ defects: [DefectNote],
+        for room: CDInspectionRoom,
+        in context: NSManagedObjectContext
+    ) {
+        let existingNotes = (room.defects as? Set<CDDefectNote>) ?? []
+
+        for stored in existingNotes
+        where !defects.contains(where: { $0.id == stored.id }) {
+            context.delete(stored)
+        }
+
+        for defect in defects {
+            let stored =
+                existingNotes.first(where: { $0.id == defect.id })
+                ?? CDDefectNote(context: context)
+
+            stored.id = defect.id
+            stored.body = defect.body
+            stored.photoPath = defect.photoPath
+            stored.createdAt = defect.createdAt
+            stored.room = room
+        }
+    }
+
+    private func existingInspection(
+        id: UUID,
+        in context: NSManagedObjectContext
+    ) -> CDPropertyInspection? {
+        let request = NSFetchRequest<CDPropertyInspection>(
+            entityName: "PropertyInspection"
+        )
+
+        request.predicate = NSPredicate(
+            format: "id == %@",
+            id as CVarArg
+        )
+
+        request.fetchLimit = 1
+
         return try? context.fetch(request).first
     }
 
-    private func map(_ object: CDInspectionRoom) -> InspectionRoom {
-        let notes = ((object.defects as? Set<CDDefectNote>) ?? []).map { note in
-            DefectNote(id: note.id ?? UUID(), body: note.body ?? "", createdAt: note.createdAt ?? Date())
-        }
+    private func existingRoom(
+        id: UUID,
+        in context: NSManagedObjectContext
+    ) -> CDInspectionRoom? {
+        let request = NSFetchRequest<CDInspectionRoom>(
+            entityName: "InspectionRoom"
+        )
+
+        request.predicate = NSPredicate(
+            format: "id == %@",
+            id as CVarArg
+        )
+
+        request.fetchLimit = 1
+
+        return try? context.fetch(request).first
+    }
+
+    private func mapInspection(
+        _ object: CDPropertyInspection
+    ) -> PropertyInspection {
+        let rooms = ((object.rooms as? Set<CDInspectionRoom>) ?? [])
+            .map(mapRoom)
+            .sorted { $0.sortOrder < $1.sortOrder }
+
+        return PropertyInspection(
+            id: object.id ?? UUID(),
+            propertyAddress: object.propertyAddress ?? "",
+            openedAt: object.openedAt ?? Date(),
+            closedAt: object.closedAt,
+            rooms: rooms
+        )
+    }
+
+    private func mapRoom(
+        _ object: CDInspectionRoom
+    ) -> InspectionRoom {
+        let notes = ((object.defects as? Set<CDDefectNote>) ?? [])
+            .map { note in
+                DefectNote(
+                    id: note.id ?? UUID(),
+                    body: note.body ?? "",
+                    photoPath: note.photoPath,
+                    createdAt: note.createdAt ?? Date()
+                )
+            }
+            .sorted { $0.createdAt < $1.createdAt }
+
         return InspectionRoom(
             id: object.id ?? UUID(),
             name: object.name ?? "",

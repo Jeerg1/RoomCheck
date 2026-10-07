@@ -28,7 +28,7 @@ struct OpenInspection {
         let trimmed = address.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw OpenInspectionError.emptyAddress }
         if let existing = repository.openInspection(address: trimmed) {
-            throw OpenInspectionError.inspectionAlreadyOpen(address: existing.propertyAddress)
+            return existing
         }
         let inspection = PropertyInspection(
             id: UUID(),

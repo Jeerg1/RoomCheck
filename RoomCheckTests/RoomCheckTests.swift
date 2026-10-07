@@ -104,3 +104,24 @@ struct CloseInspectionTests {
         try CloseInspection().call(rooms: rooms)
     }
 }
+
+struct InspectionRepositoryTests {
+    @Test func savesAndRetrievesOpenInspection() {
+        let repository = MockInspectionRepository()
+
+        let inspection = PropertyInspection(
+            id: UUID(),
+            propertyAddress: "12 Darling Street",
+            openedAt: Date(),
+            closedAt: nil,
+            rooms: []
+        )
+
+        repository.save(inspection)
+
+        let saved = repository.openInspection(address: "12 Darling Street")
+
+        #expect(saved?.id == inspection.id)
+        #expect(saved?.propertyAddress == "12 Darling Street")
+    }
+}

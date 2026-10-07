@@ -72,6 +72,29 @@ struct OpenInspectionTests {
     }
 }
 
+struct MarkRoomClearTests {
+    @Test func rejectsClearWhenRoomHasDefects() {
+        let room = InspectionRoom(
+            id: UUID(),
+            name: "Kitchen",
+            sortOrder: 1,
+            status: .hasDefect,
+            defects: [
+                DefectNote(
+                    id: UUID(),
+                    body: "Dirty floor",
+                    photoPath: nil,
+                    createdAt: Date()
+                )
+            ]
+        )
+
+        #expect(throws: MarkRoomClearError.roomHasDefects) {
+            try MarkRoomClear().call(room: room)
+        }
+    }
+}
+
 struct RecordDefectTests {
     @Test func rejectsDefectWithEmptyNote() {
         let room = InspectionRoom(

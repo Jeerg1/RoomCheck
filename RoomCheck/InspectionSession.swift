@@ -18,6 +18,7 @@ final class InspectionSession: ObservableObject {
     private let openInspection: OpenInspection
     private let recordDefect = RecordDefect()
     private let closeInspection = CloseInspection()
+    private let markRoomClear = MarkRoomClear()
 
     init(repository: InspectionRepository) {
         self.repository = repository
@@ -79,13 +80,18 @@ final class InspectionSession: ObservableObject {
             return
         }
 
-        var updated = rooms[index]
-        updated.status = .clear
+        do {
+            let updated = try markRoomClear.call(room: rooms[index])
 
-        repository.save(updated)
-        rooms[index] = updated
-        message = nil
-        publishWidget()
+            repository.save(updated)
+            rooms[index] = updated
+            message = nil
+            publishWidget()
+        } catch let error as MarkRoomClearError {
+            message = error.message
+        } catch {
+            message = "The room could not be marked clear. Try again."
+        }
     }
     
     func close() {

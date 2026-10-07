@@ -10,11 +10,13 @@ import WidgetKit
 
 final class InspectionSession: ObservableObject {
     @Published private(set) var rooms: [InspectionRoom] = []
+    @Published private(set) var inspection: PropertyInspection?
     @Published var message: String?
 
     private let repository: InspectionRepository
     private let openInspection: OpenInspection
     private let recordDefect = RecordDefect()
+    private let closeInspection = CloseInspection()
 
     init(repository: InspectionRepository) {
         self.repository = repository
@@ -40,9 +42,11 @@ final class InspectionSession: ObservableObject {
 
     func start(address: String) {
         guard rooms.isEmpty else { return }
+
         do {
-            _ = try openInspection.call(address: address)
-            rooms = repository.rooms()
+            let opened = try openInspection.call(address: address)
+            inspection = opened
+            rooms = opened.rooms
             message = nil
             publishWidget()
         } catch let error as InspectionJobError {
@@ -66,10 +70,34 @@ final class InspectionSession: ObservableObject {
             message = "The defect could not be saved. Try again."
         }
     }
+    
+    func close() {
+        do {
+            try closeInspection.call(rooms: rooms)
+
+            guard var inspection else { return }
+
+            inspection.rooms = rooms
+            inspection.closedAt = Date()
+
+            repository.save(inspection)
+
+            self.inspection = nil
+            rooms = []
+            message = nil
+            publishWidget()
+        } catch let error as CloseInspectionError {
+            message = error.message
+        } catch {
+            message = "The inspection could not be closed. Try again."
+        }
+    }
 
     func clear() {
+        inspection = nil
         rooms = []
         message = nil
+        publishWidget()
     }
 
     private func publishWidget() {

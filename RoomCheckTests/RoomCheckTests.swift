@@ -43,6 +43,16 @@ struct OpenInspectionTests {
             try useCase.call(address: "12 darling street")
         }
     }
+    
+    @Test func createsNewInspectionForNewAddress() throws {
+        let repository = MockInspectionRepository()
+        let useCase = OpenInspection(repository: repository)
+
+        let inspection = try useCase.call(address: "12 Darling Street")
+
+        #expect(inspection.propertyAddress == "12 Darling Street")
+        #expect(inspection.rooms.count == 6)
+    }
 }
 
 struct RecordDefectTests {

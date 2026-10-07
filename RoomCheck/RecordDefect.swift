@@ -7,10 +7,21 @@
 
 import Foundation
 
+enum RecordDefectError: Error, Equatable {
+    case emptyDefectNote
+
+    var message: String {
+        switch self {
+        case .emptyDefectNote:
+            return "Write what is wrong in this room. A photo alone is not a condition note."
+        }
+    }
+}
+
 struct RecordDefect {
     func call(room: InspectionRoom, note: String, photoPath: String?) throws -> InspectionRoom {
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw InspectionJobError.emptyDefectNote }
+        guard !trimmed.isEmpty else { throw RecordDefectError.emptyDefectNote }
         let path = photoPath?.trimmingCharacters(in: .whitespacesAndNewlines)
         var updated = room
         updated.defects.append(

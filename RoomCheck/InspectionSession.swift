@@ -49,7 +49,7 @@ final class InspectionSession: ObservableObject {
             rooms = opened.rooms
             message = nil
             publishWidget()
-        } catch let error as InspectionJobError {
+        } catch let error as OpenInspectionError {
             message = error.message
         } catch {
             message = "The inspection could not be saved. Try again."
@@ -64,7 +64,7 @@ final class InspectionSession: ObservableObject {
             rooms[index] = updated
             message = nil
             publishWidget()
-        } catch let error as InspectionJobError {
+        } catch let error as RecordDefectError {
             message = error.message
         } catch {
             message = "The defect could not be saved. Try again."

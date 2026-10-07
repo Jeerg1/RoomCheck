@@ -7,10 +7,9 @@
 
 import Foundation
 
-enum InspectionJobError: Error, Equatable {
+enum OpenInspectionError: Error, Equatable {
     case emptyAddress
     case inspectionAlreadyOpen(address: String)
-    case emptyDefectNote
 
     var message: String {
         switch self {
@@ -18,8 +17,6 @@ enum InspectionJobError: Error, Equatable {
             return "Enter the property address before you start the walk-through."
         case .inspectionAlreadyOpen(let address):
             return "Close the open inspection at \(address) before you start another."
-        case .emptyDefectNote:
-            return "Write what is wrong in this room. A photo alone is not a condition note."
         }
     }
 }
@@ -29,9 +26,9 @@ struct OpenInspection {
 
     func call(address: String) throws -> PropertyInspection {
         let trimmed = address.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw InspectionJobError.emptyAddress }
+        guard !trimmed.isEmpty else { throw OpenInspectionError.emptyAddress }
         if let existing = repository.openInspection(address: trimmed) {
-            throw InspectionJobError.inspectionAlreadyOpen(address: existing.propertyAddress)
+            throw OpenInspectionError.inspectionAlreadyOpen(address: existing.propertyAddress)
         }
         let inspection = PropertyInspection(
             id: UUID(),

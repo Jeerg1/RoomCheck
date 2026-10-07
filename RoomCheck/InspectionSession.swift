@@ -73,6 +73,20 @@ final class InspectionSession: ObservableObject {
         }
     }
     
+    func markClear(roomId: UUID) {
+        guard let index = rooms.firstIndex(where: { $0.id == roomId }) else {
+            return
+        }
+
+        var updated = rooms[index]
+        updated.status = .clear
+
+        repository.save(updated)
+        rooms[index] = updated
+        message = nil
+        publishWidget()
+    }
+    
     func close() {
         do {
             try closeInspection.call(rooms: rooms)

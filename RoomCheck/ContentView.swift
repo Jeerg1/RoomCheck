@@ -72,21 +72,28 @@ struct InspectionHistoryView: View {
                             .font(.headline)
 
                         if let closedAt = inspection.closedAt {
-                            Text(closedAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            Text(
+                                closedAt.formatted(
+                                    date: .abbreviated,
+                                    time: .shortened
+                                )
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
         }
         .navigationTitle("Inspection History")
+        .navigationBarBackButtonHidden(false)
     }
 }
 
 struct RoomDetailView: View {
     @EnvironmentObject private var session: InspectionSession
     let room: InspectionRoom
+
     @State private var note = ""
     @State private var photoPath = ""
 
@@ -100,9 +107,11 @@ struct RoomDetailView: View {
                 Text("No defects in this room")
                     .foregroundStyle(.secondary)
             }
+
             ForEach(live.defects) { defect in
                 VStack(alignment: .leading) {
                     Text(defect.body)
+
                     if let photoPath = defect.photoPath {
                         Text(photoPath)
                             .font(.caption)
@@ -110,18 +119,32 @@ struct RoomDetailView: View {
                     }
                 }
             }
+
             TextField("What is wrong in this room?", text: $note)
+
             TextField("Photo path", text: $photoPath)
+
             Button("Record defect") {
-                session.addDefect(roomId: live.id, note: note, photoPath: photoPath)
+                session.addDefect(
+                    roomId: live.id,
+                    note: note,
+                    photoPath: photoPath
+                )
+
                 note = ""
                 photoPath = ""
             }
+
+            Button("Mark room clear") {
+                session.markClear(roomId: live.id)
+            }
+
             if let message = session.message {
                 Text(message)
                     .foregroundStyle(.red)
             }
         }
         .navigationTitle(live.name)
+        .navigationBarBackButtonHidden(false)
     }
 }

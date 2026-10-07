@@ -39,7 +39,7 @@ struct OpenInspectionTests {
         let useCase = OpenInspection(repository: repository)
         _ = try useCase.call(address: "12 Darling Street")
 
-        #expect(throws: InspectionJobError.inspectionAlreadyOpen(address: "12 Darling Street")) {
+        #expect(throws: OpenInspectionError.inspectionAlreadyOpen(address: "12 Darling Street")) {
             try useCase.call(address: "12 darling street")
         }
     }
@@ -65,7 +65,7 @@ struct RecordDefectTests {
             defects: []
         )
 
-        #expect(throws: InspectionJobError.emptyDefectNote) {
+        #expect(throws: RecordDefectError.emptyDefectNote) {
             try RecordDefect().call(room: room, note: "   ", photoPath: "kitchen.jpg")
         }
     }

@@ -23,6 +23,10 @@ final class MockInspectionRepository: InspectionRepository {
             $0.isOpen && $0.propertyAddress.compare(address, options: .caseInsensitive) == .orderedSame
         }
     }
+    
+    func closedInspections() -> [PropertyInspection] {
+        inspections.filter { !$0.isOpen }
+    }
 
     func save(_ inspection: PropertyInspection) {
         if let index = inspections.firstIndex(where: { $0.id == inspection.id }) {

@@ -28,6 +28,11 @@ struct ContentView: View {
                             }
                         }
                     }
+
+                    Button("Close Inspection") {
+                        session.close()
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
                 if let message = session.message {
                     Text(message)

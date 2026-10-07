@@ -85,6 +85,24 @@ struct RecordDefectTests {
             try RecordDefect().call(room: room, note: "   ", photoPath: "kitchen.jpg")
         }
     }
+    
+    @Test func rejectsWhitespaceOnlyDefectNoteWithPhoto() {
+        let room = InspectionRoom(
+            id: UUID(),
+            name: "Entry",
+            sortOrder: 0,
+            status: .unchecked,
+            defects: []
+        )
+
+        #expect(throws: RecordDefectError.emptyDefectNote) {
+            try RecordDefect().call(
+                room: room,
+                note: "   ",
+                photoPath: "entry.jpg"
+            )
+        }
+    }
 }
 
 struct CloseInspectionTests {

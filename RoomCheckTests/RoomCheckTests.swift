@@ -42,14 +42,15 @@ final class MockInspectionRepository: InspectionRepository {
 }
 
 struct OpenInspectionTests {
-    @Test func rejectsSecondOpenInspectionOnSameProperty() throws {
+    @Test func resumesOpenInspectionOnSameProperty() throws {
         let repository = MockInspectionRepository()
         let useCase = OpenInspection(repository: repository)
-        _ = try useCase.call(address: "12 Darling Street")
 
-        #expect(throws: OpenInspectionError.inspectionAlreadyOpen(address: "12 Darling Street")) {
-            try useCase.call(address: "12 darling street")
-        }
+        let first = try useCase.call(address: "12 Darling Street")
+        let second = try useCase.call(address: "12 darling street")
+
+        #expect(first.id == second.id)
+        #expect(repository.inspections.count == 1)
     }
     
     @Test func createsNewInspectionForNewAddress() throws {

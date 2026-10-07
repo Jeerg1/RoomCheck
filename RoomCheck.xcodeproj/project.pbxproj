@@ -60,6 +60,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4B7CF49B30760BB900F09B1F /* RoomCheckWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RoomCheckWidgetExtension.entitlements; sourceTree = "<group>"; };
 		4BA7284430732D8400E03ABD /* RoomCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoomCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BA7285430732D8800E03ABD /* RoomCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RoomCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BA7285E30732D8800E03ABD /* RoomCheckUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RoomCheckUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -164,6 +165,7 @@
 		4BA7283B30732D8400E03ABD = {
 			isa = PBXGroup;
 			children = (
+				4B7CF49B30760BB900F09B1F /* RoomCheckWidgetExtension.entitlements */,
 				4BA7284630732D8400E03ABD /* RoomCheck */,
 				4BA7285730732D8800E03ABD /* RoomCheckTests */,
 				4BA7286130732D8800E03ABD /* RoomCheckUITests */,
@@ -723,6 +725,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = RoomCheckWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A5J469PP78;
@@ -750,6 +753,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = RoomCheckWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A5J469PP78;

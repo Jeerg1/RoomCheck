@@ -22,7 +22,8 @@ final class InspectionSession: ObservableObject {
     init(repository: InspectionRepository) {
         self.repository = repository
         openInspection = OpenInspection(repository: repository)
-        rooms = repository.rooms()
+        inspection = repository.currentOpenInspection()
+        rooms = inspection?.rooms ?? []
         closedInspections = repository.closedInspections()
         publishWidget()
     }

@@ -35,6 +35,10 @@ final class MockInspectionRepository: InspectionRepository {
             inspections.append(inspection)
         }
     }
+    
+    func currentOpenInspection() -> PropertyInspection? {
+        inspections.first { $0.isOpen }
+    }
 }
 
 struct OpenInspectionTests {

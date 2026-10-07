@@ -15,6 +15,7 @@ protocol InspectionRepository {
     func openInspection(address: String) -> PropertyInspection?
     func closedInspections() -> [PropertyInspection]
     func save(_ inspection: PropertyInspection)
+    func currentOpenInspection() -> PropertyInspection?
 }
 
 final class CoreDataInspectionRepository: InspectionRepository {
@@ -244,5 +245,27 @@ final class CoreDataInspectionRepository: InspectionRepository {
             status: RoomStatus(rawValue: object.statusRaw ?? "") ?? .unchecked,
             defects: notes
         )
+    }
+    
+    func currentOpenInspection() -> PropertyInspection? {
+        let request = NSFetchRequest<CDPropertyInspection>(
+            entityName: "PropertyInspection"
+        )
+
+        request.predicate = NSPredicate(
+            format: "closedAt == nil"
+        )
+
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "openedAt", ascending: false)
+        ]
+
+        request.fetchLimit = 1
+
+        guard let stored = (try? container.viewContext.fetch(request))?.first else {
+            return nil
+        }
+
+        return mapInspection(stored)
     }
 }

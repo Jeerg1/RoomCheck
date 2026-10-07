@@ -117,11 +117,8 @@ final class InspectionSession: ObservableObject {
         }
     }
 
-    func clear() {
-        inspection = nil
-        rooms = []
+    func dismissMessage() {
         message = nil
-        publishWidget()
     }
 
     private func publishWidget() {

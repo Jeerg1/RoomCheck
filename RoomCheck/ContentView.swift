@@ -37,8 +37,8 @@ struct ContentView: View {
                     Text(message)
                         .foregroundStyle(.red)
 
-                    Button("Clear open inspection") {
-                        session.clear()
+                    Button("Dismiss") {
+                        session.dismissMessage()
                     }
                 }
             }

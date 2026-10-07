@@ -67,19 +67,29 @@ struct InspectionHistoryView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(session.closedInspections) { inspection in
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(inspection.propertyAddress)
                             .font(.headline)
 
                         if let closedAt = inspection.closedAt {
-                            Text(
-                                closedAt.formatted(
-                                    date: .abbreviated,
-                                    time: .shortened
-                                )
-                            )
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            Text(closedAt.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        let defects = inspection.rooms.flatMap { room in
+                            room.defects.map { "\(room.name): \($0.body)" }
+                        }
+
+                        if defects.isEmpty {
+                            Text("No defects recorded")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(defects, id: \.self) { defect in
+                                Text(defect)
+                                    .font(.caption)
+                            }
                         }
                     }
                 }
@@ -92,6 +102,7 @@ struct InspectionHistoryView: View {
 
 struct RoomDetailView: View {
     @EnvironmentObject private var session: InspectionSession
+    @Environment(\.dismiss) private var dismiss
     let room: InspectionRoom
 
     @State private var note = ""
@@ -137,6 +148,7 @@ struct RoomDetailView: View {
 
             Button("Mark room clear") {
                 session.markClear(roomId: live.id)
+                dismiss()
             }
 
             if let message = session.message {

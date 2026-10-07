@@ -67,28 +67,32 @@ struct InspectionHistoryView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(session.closedInspections) { inspection in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(inspection.propertyAddress)
-                            .font(.headline)
+                    NavigationLink {
+                        InspectionSummaryView(inspection: inspection)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(inspection.propertyAddress)
+                                .font(.headline)
 
-                        if let closedAt = inspection.closedAt {
-                            Text(closedAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        let defects = inspection.rooms.flatMap { room in
-                            room.defects.map { "\(room.name): \($0.body)" }
-                        }
-
-                        if defects.isEmpty {
-                            Text("No defects recorded")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            ForEach(defects, id: \.self) { defect in
-                                Text(defect)
+                            if let closedAt = inspection.closedAt {
+                                Text(closedAt.formatted(date: .abbreviated, time: .shortened))
                                     .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            let defects = inspection.rooms.flatMap { room in
+                                room.defects.map { "\(room.name): \($0.body)" }
+                            }
+
+                            if defects.isEmpty {
+                                Text("No defects recorded")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                ForEach(defects, id: \.self) { defect in
+                                    Text(defect)
+                                        .font(.caption)
+                                }
                             }
                         }
                     }
@@ -96,6 +100,49 @@ struct InspectionHistoryView: View {
             }
         }
         .navigationTitle("Inspection History")
+        .navigationBarBackButtonHidden(false)
+    }
+}
+
+struct InspectionSummaryView: View {
+    let inspection: PropertyInspection
+
+    var body: some View {
+        List {
+            Section("Property") {
+                Text(inspection.propertyAddress)
+
+                if let closedAt = inspection.closedAt {
+                    Text(closedAt.formatted(date: .abbreviated, time: .shortened))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            ForEach(inspection.rooms) { room in
+                Section(room.name) {
+                    Text(room.status == .clear ? "Clear" : "Defect")
+
+                    if room.defects.isEmpty {
+                        Text("No defects recorded")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(room.defects) { defect in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(defect.body)
+
+                                if let photoPath = defect.photoPath,
+                                   !photoPath.isEmpty {
+                                    Text(photoPath)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Inspection Summary")
         .navigationBarBackButtonHidden(false)
     }
 }

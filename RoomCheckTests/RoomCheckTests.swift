@@ -61,6 +61,14 @@ struct OpenInspectionTests {
         #expect(inspection.propertyAddress == "12 Darling Street")
         #expect(inspection.rooms.count == 6)
     }
+    @Test func rejectsBlankPropertyAddress() {
+        let repository = MockInspectionRepository()
+        let useCase = OpenInspection(repository: repository)
+
+        #expect(throws: OpenInspectionError.emptyAddress) {
+            try useCase.call(address: "   ")
+        }
+    }
 }
 
 struct RecordDefectTests {
